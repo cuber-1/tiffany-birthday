@@ -1458,6 +1458,10 @@ const CONFIG = {
 
 const $  = (s, c = document) => c.querySelector(s);
 const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+
+/* always start at the top — don't let the browser restore the old scroll spot */
+if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+scrollTo(0, 0);
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
@@ -1497,6 +1501,9 @@ function finishIntro(){
 function startExperience(){
   if (introDone) return;
   introDone = true;
+  document.documentElement.style.scrollBehavior = "auto";
+  scrollTo(0, 0);
+  document.documentElement.style.scrollBehavior = "";
 
   audio.play().then(() => {
     musicBtn.classList.add("playing");
