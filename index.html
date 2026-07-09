@@ -725,6 +725,86 @@ body.letter-open .letter-card{ visibility:visible; opacity:1; }
 /* ==================================================================
    MUSIC CONTROLLER
    ================================================================== */
+/* ==================================================================
+   TOOLS  ·  hammer cracks the page, golden brush repaints it
+   ================================================================== */
+.tools{
+  position:fixed; z-index:45; left:max(2.5vw, 14px); top:50%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:8px; padding:9px;
+  border-radius:16px;
+  background:rgba(255,253,248,.72);
+  -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  box-shadow:0 1px 2px rgba(65,51,57,.08), 0 10px 26px rgba(65,51,57,.14), inset 0 0 0 1px rgba(194,154,86,.4);
+  opacity:0; transition:opacity 1.2s ease 2.6s;
+}
+body.ready .tools{ opacity:1; }
+.tool-btn{
+  width:44px; height:44px; border-radius:12px;
+  display:grid; place-items:center;
+  background:transparent; border:1px solid transparent; cursor:pointer;
+  color:var(--champagne-deep);
+  transition:background .3s ease, border-color .3s ease, transform .3s var(--ease-spring);
+}
+.tool-btn:hover{ background:rgba(194,154,86,.12); transform:scale(1.08); }
+.tool-btn.active{
+  background:rgba(194,154,86,.2); border-color:rgba(194,154,86,.55);
+  box-shadow:inset 0 1px 3px rgba(65,51,57,.12);
+}
+.tool-btn svg{ width:22px; height:22px; }
+
+/* per-tool cursors (gold hammer / gold brush) */
+body.tool-hammer, body.tool-hammer *{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Cpath d='M3 21l7-7' stroke='%23A8813F' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M11.8 12.2l6-6a1.8 1.8 0 0 1 2.6 0l1.3 1.3a1.8 1.8 0 0 1 0 2.6l-6 6z' fill='%23C29A56' stroke='%23413339' stroke-width='1'/%3E%3C/svg%3E") 5 25, auto !important;
+}
+body.tool-brush, body.tool-brush *{
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Cpath d='M20.7 3.3c.9.9.9 2.3 0 3.2l-8.3 8.3-3.2-3.2 8.3-8.3c.9-.9 2.3-.9 3.2 0z' fill='%23C29A56' stroke='%23413339' stroke-width='.8'/%3E%3Cpath d='M8.7 12.1l3.2 3.2-2.1 2c-1.2 1.2-3.1 1.5-4.7.9-.9-.3-1.9-.3-2.8.1.9-1 1.3-2.3 1.2-3.6-.1-1 .3-2.1 1.1-2.8z' fill='%23E2ACB5' stroke='%23413339' stroke-width='.8'/%3E%3C/svg%3E") 4 25, auto !important;
+}
+
+/* cracks drawn where the hammer hits */
+#crackLayer{ position:fixed; inset:0; z-index:35; pointer-events:none; }
+.crack{
+  position:absolute; transform:translate(-50%,-50%) scale(.3); opacity:0;
+  animation:crack-pop .28s var(--ease-out) forwards;
+}
+@keyframes crack-pop{ to{ transform:translate(-50%,-50%) scale(1); opacity:1; } }
+
+/* paint splashes behind the content */
+#paintLayer{ position:fixed; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+.paint-splash{
+  position:absolute; width:60px; height:60px; border-radius:50%;
+  transform:translate(-50%,-50%) scale(0); opacity:.5;
+  animation:splash-grow 1.4s var(--ease-out) forwards;
+}
+@keyframes splash-grow{ to{ transform:translate(-50%,-50%) scale(60); } }
+
+/* the whole page falls apart after 5 hammer hits */
+body.shattering .page{
+  animation:fall-away 1.5s cubic-bezier(.5,0,.9,.4) .15s forwards;
+}
+body.shattering .monogram,
+body.shattering .music,
+body.shattering .tools,
+body.shattering .blame-note{
+  animation:fall-away 1.2s cubic-bezier(.5,0,.9,.4) forwards;
+}
+@keyframes fall-away{
+  15%{ transform:translateY(-14px) rotate(-1deg); }
+  100%{ transform:translateY(125vh) rotate(5deg); opacity:.15; }
+}
+body.thud .page{ animation:thud .3s ease; }
+@keyframes thud{
+  20%{ transform:translate(4px,-3px) rotate(.3deg); }
+  55%{ transform:translate(-3px,2px) rotate(-.25deg); }
+}
+
+/* blackout used while everything resets */
+#shatterFade{
+  position:fixed; inset:0; z-index:80; background:#171114;
+  opacity:0; visibility:hidden; pointer-events:none;
+  transition:opacity .8s ease, visibility 0s .8s;
+}
+#shatterFade.show{ opacity:1; visibility:visible; transition:opacity .8s ease; }
+
 .music{
   position:fixed; z-index:40; right:max(3vw, 20px); bottom:max(3.5vh, 22px);
   width:60px; height:60px; border-radius:50%;
@@ -928,7 +1008,7 @@ body.ready .music{ opacity:1; }
 
       <!-- the cake -->
       <div class="cake-stage">
-        <div class="cake-tilt" id="cake" role="img" aria-label="A three tier birthday cake with the number 20 and three lit candles. Click to make a wish.">
+        <div class="cake-tilt" id="cake" role="img" aria-label="A three tier birthday cake with the number 30 and three lit candles. Click to make a wish.">
           <svg class="cake-svg" viewBox="0 0 460 520" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="tierBottom" x1="0" y1="0" x2="1" y2="0">
@@ -1010,7 +1090,7 @@ body.ready .music{ opacity:1; }
                     fill="#FBE4E8" opacity=".95"/>
               <!-- the piped number 20 -->
               <g font-family="Didot, 'Bodoni MT', Georgia, serif" text-anchor="middle">
-                <text x="230" y="330" font-size="58" fill="#B4894A" opacity=".35" transform="translate(0,2.5)">20</text>
+                <text x="230" y="330" font-size="58" fill="#B4894A" opacity=".35" transform="translate(0,2.5)" id="cakeAgeShadow">20</text>
                 <text x="230" y="330" font-size="58" fill="#FFFDF6" stroke="#D9B879" stroke-width="1.4" id="cakeAge">20</text>
               </g>
               <!-- tiny piped dots framing the number -->
@@ -1217,6 +1297,26 @@ body.ready .music{ opacity:1; }
   </div>
 </div>
 
+<!-- ========================= TOOLS ============================== -->
+<div id="paintLayer" aria-hidden="true"></div>
+<div id="crackLayer" aria-hidden="true"></div>
+<div id="shatterFade" aria-hidden="true"></div>
+
+<div class="tools" role="toolbar" aria-label="Fun tools">
+  <button class="tool-btn" id="toolHammer" aria-label="Hammer: crack the page" title="Break stuff">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 21l7-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M11.8 12.2l6-6a1.8 1.8 0 0 1 2.6 0l1.3 1.3a1.8 1.8 0 0 1 0 2.6l-6 6z" fill="currentColor"/>
+    </svg>
+  </button>
+  <button class="tool-btn" id="toolBrush" aria-label="Golden brush: paint the page" title="Paint stuff">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M20.7 3.3c.9.9.9 2.3 0 3.2l-8.3 8.3-3.2-3.2 8.3-8.3c.9-.9 2.3-.9 3.2 0z" fill="currentColor"/>
+      <path d="M8.7 12.1l3.2 3.2-2.1 2c-1.2 1.2-3.1 1.5-4.7.9-.9-.3-1.9-.3-2.8.1.9-1 1.3-2.3 1.2-3.6-.1-1 .3-2.1 1.1-2.8z" fill="currentColor" opacity=".55"/>
+    </svg>
+  </button>
+</div>
+
 <!-- ========================= MUSIC ============================== -->
 <p class="blame-note" id="blameNote">Isabeth told me you like this song so if you don't don't blame me :)</p>
 <button class="music" id="musicBtn" aria-label="Play birthday music" aria-pressed="false">
@@ -1252,11 +1352,11 @@ const CONFIG = {
   /* Who is this for? */
   recipientName : "Ms. Tiffany",   // full display name
   initial       : "T",             // monogram + wax seal letter
-  age           : 20,
+  age           : 30,
 
   /* Your letter. Each string is one paragraph. */
   letterText : [
-    "10:30 AM: Happy 20th \u2013 just making an educated guess here. Cheers to being a very cool and good person. At work rn so speed running this letter but you know that I think you\u2019re fye. Glad I met Isabeth because meeting you was hecka tuff.",
+    "10:30 AM: Happy 30th \u2013 just making an educated guess here. Cheers to being a very cool and good person. At work rn so speed running this letter but you know that I think you\u2019re fye. Glad I met Isabeth because meeting you was hecka tuff.",
     "12:31 PM: Ok I got more downtime to actually write this letter.",
     "Usually I like to handwrite these but don\u2019t think that will be possible unfortunately (Someone chose to stay in MD). You\u2019ve always been really kind and welcoming to me, and I appreciated that since we first met. I\u2019ve always liked coming over and having random talks about literally anything from school to drag shows. I admire how comfortable you are with just speaking what\u2019s on your mind and really love how easy it is to talk to you.",
     "I was trying to remember all the memories over the years and a few came to mind.",
@@ -1314,6 +1414,7 @@ $("#monogramText").innerHTML      = `${CONFIG.initial} &middot; ${CONFIG.age}`;
 $("#introMark").textContent       = CONFIG.initial;
 $("#sealInitial").textContent     = CONFIG.initial;
 $("#cakeAge").textContent         = CONFIG.age;
+$("#cakeAgeShadow").textContent   = CONFIG.age;
 $("#miniSalutation").textContent  = `Dear ${CONFIG.recipientName}\u2026`;
 $("#letterSalutation").textContent= `Dear ${CONFIG.recipientName},`;
 $("#finaleNum").textContent       = CONFIG.age;
@@ -1732,6 +1833,97 @@ musicBtn.addEventListener("click", async () => {
 audio.addEventListener("error", () => {
   musicBtn.classList.remove("playing");
   showTip(`Music file not found. Place <b>${CONFIG.musicFile}</b> in the same folder as this page.`);
+});
+
+/* ---------------- tools: hammer + golden brush ---------------- */
+const crackLayer  = $("#crackLayer");
+const paintLayer  = $("#paintLayer");
+const shatterFade = $("#shatterFade");
+const toolBtns    = { hammer: $("#toolHammer"), brush: $("#toolBrush") };
+const PAINTS      = ["#F3D6D9", "#DDD4EC", "#F8E4CF", "#CDE3F5", "#EBD9AE", "#E2ACB5"];
+let activeTool = null, crackCount = 0, paintIdx = 0, shattering = false;
+
+function setTool(name){
+  activeTool = activeTool === name ? null : name;
+  document.body.classList.toggle("tool-hammer", activeTool === "hammer");
+  document.body.classList.toggle("tool-brush",  activeTool === "brush");
+  toolBtns.hammer.classList.toggle("active", activeTool === "hammer");
+  toolBtns.brush.classList.toggle("active",  activeTool === "brush");
+}
+toolBtns.hammer.addEventListener("click", () => setTool("hammer"));
+toolBtns.brush.addEventListener("click",  () => setTool("brush"));
+
+/* jagged crack drawn as random radiating polylines */
+function addCrack(x, y){
+  const S = 200, C = S / 2;
+  const ns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(ns, "svg");
+  svg.setAttribute("viewBox", `0 0 ${S} ${S}`);
+  svg.setAttribute("width", S); svg.setAttribute("height", S);
+  svg.classList.add("crack");
+  svg.style.left = x + "px"; svg.style.top = y + "px";
+  const branches = 5 + Math.floor(Math.random() * 3);
+  for (let b = 0; b < branches; b++){
+    const ang = (b / branches) * Math.PI * 2 + Math.random() * 0.9;
+    let px = C, py = C, pts = `${C},${C}`;
+    const segs = 3 + Math.floor(Math.random() * 3);
+    for (let sIdx = 1; sIdx <= segs; sIdx++){
+      const dist = (C * 0.9 * sIdx) / segs;
+      px = C + Math.cos(ang + (Math.random() - .5) * .7) * dist;
+      py = C + Math.sin(ang + (Math.random() - .5) * .7) * dist;
+      pts += ` ${px.toFixed(1)},${py.toFixed(1)}`;
+    }
+    const line = document.createElementNS(ns, "polyline");
+    line.setAttribute("points", pts);
+    line.setAttribute("fill", "none");
+    line.setAttribute("stroke", "rgba(65,51,57,.6)");
+    line.setAttribute("stroke-width", (1.6 - b * 0.15).toFixed(2));
+    line.setAttribute("stroke-linecap", "round");
+    svg.appendChild(line);
+  }
+  crackLayer.appendChild(svg);
+}
+
+function shatter(){
+  shattering = true;
+  document.body.classList.add("shattering");
+  setTimeout(() => shatterFade.classList.add("show"), 1300);
+  setTimeout(() => {
+    crackLayer.innerHTML = "";
+    crackCount = 0;
+    document.body.classList.remove("shattering");
+  }, 2200);
+  setTimeout(() => {
+    shatterFade.classList.remove("show");
+    shattering = false;
+  }, 2600);
+}
+
+function addSplash(x, y){
+  const s = document.createElement("span");
+  s.className = "paint-splash";
+  s.style.left = x + "px"; s.style.top = y + "px";
+  s.style.background = PAINTS[paintIdx % PAINTS.length];
+  paintIdx++;
+  paintLayer.appendChild(s);
+  while (paintLayer.children.length > 6) paintLayer.firstChild.remove();
+}
+
+document.addEventListener("click", e => {
+  if (!activeTool || shattering || !introDone) return;
+  /* leave real interactive things alone */
+  if (e.target.closest(".tools, .music, .envelope, .cake-tilt, .letter-card, .intro, button, a")) return;
+
+  if (activeTool === "hammer"){
+    addCrack(e.clientX, e.clientY);
+    crackCount++;
+    document.body.classList.remove("thud");
+    void document.body.offsetWidth;      /* restart the shake */
+    document.body.classList.add("thud");
+    if (crackCount >= 5) shatter();
+  } else {
+    addSplash(e.clientX, e.clientY);
+  }
 });
 
 })();
