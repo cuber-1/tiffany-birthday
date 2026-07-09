@@ -91,6 +91,7 @@ body{
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
   overflow-x:hidden;
+  overflow-x:clip;   /* stronger than hidden: prevents sideways scroll drift on mobile */
   line-height:1.6;
 }
 ::selection{ background:rgba(194,154,86,.25); color:var(--ink); }
@@ -251,7 +252,7 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 /* ==================================================================
    GIANT BACKGROUND WORDS  ·  angled marquee bands that loop forever
    ================================================================== */
-.bg-words{ position:absolute; inset:0; z-index:-1; pointer-events:none; }
+.bg-words{ position:absolute; inset:0; z-index:-1; pointer-events:none; overflow:clip; }
 .bg-word{
   position:absolute; left:50%; width:140vw; overflow:hidden; user-select:none;
   font-family:var(--font-display); font-weight:400; font-style:italic;
@@ -729,7 +730,7 @@ body.letter-open .letter-card{ visibility:visible; opacity:1; }
    TOOLS  ·  hammer cracks the page, golden brush repaints it
    ================================================================== */
 .tools{
-  position:fixed; z-index:45; left:max(2.5vw, 14px); top:50%; transform:translateY(-50%);
+  position:fixed; z-index:45; right:max(2.5vw, 14px); top:50%; transform:translateY(-50%);
   display:flex; flex-direction:column; gap:8px; padding:9px;
   border-radius:16px;
   background:rgba(255,253,248,.72);
