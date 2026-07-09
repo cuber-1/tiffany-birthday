@@ -754,7 +754,7 @@ body.ready .tools{ opacity:1; }
 
 /* per-tool cursors (gold hammer / gold brush) */
 body.tool-hammer, body.tool-hammer *{
-  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Cpath d='M3 21l7-7' stroke='%23A8813F' stroke-width='2.4' stroke-linecap='round'/%3E%3Cpath d='M11.8 12.2l6-6a1.8 1.8 0 0 1 2.6 0l1.3 1.3a1.8 1.8 0 0 1 0 2.6l-6 6z' fill='%23C29A56' stroke='%23413339' stroke-width='1'/%3E%3C/svg%3E") 5 25, auto !important;
+  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Cg transform='rotate(-40 12 12)'%3E%3Crect x='4' y='3' width='16' height='7' rx='2' fill='%23C29A56' stroke='%23413339' stroke-width='1'/%3E%3Crect x='10.4' y='10.5' width='3.2' height='11' rx='1.6' fill='%23A8813F' stroke='%23413339' stroke-width='.8'/%3E%3C/g%3E%3C/svg%3E") 6 8, auto !important;
 }
 body.tool-brush, body.tool-brush *{
   cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Cpath d='M20.7 3.3c.9.9.9 2.3 0 3.2l-8.3 8.3-3.2-3.2 8.3-8.3c.9-.9 2.3-.9 3.2 0z' fill='%23C29A56' stroke='%23413339' stroke-width='.8'/%3E%3Cpath d='M8.7 12.1l3.2 3.2-2.1 2c-1.2 1.2-3.1 1.5-4.7.9-.9-.3-1.9-.3-2.8.1.9-1 1.3-2.3 1.2-3.6-.1-1 .3-2.1 1.1-2.8z' fill='%23E2ACB5' stroke='%23413339' stroke-width='.8'/%3E%3C/svg%3E") 4 25, auto !important;
@@ -777,19 +777,14 @@ body.tool-brush, body.tool-brush *{
 }
 @keyframes splash-grow{ to{ transform:translate(-50%,-50%) scale(60); } }
 
-/* the whole page falls apart after 5 hammer hits */
-body.shattering .page{
-  animation:fall-away 1.5s cubic-bezier(.5,0,.9,.4) .15s forwards;
+/* after 5 hammer hits every piece breaks loose and falls on its own:
+   JS tags elements with .falling plus per-piece --fd (delay) / --fr (spin) */
+.falling{
+  animation:piece-fall 1.7s cubic-bezier(.42,0,.9,.4) var(--fd, 0s) forwards !important;
 }
-body.shattering .monogram,
-body.shattering .music,
-body.shattering .tools,
-body.shattering .blame-note{
-  animation:fall-away 1.2s cubic-bezier(.5,0,.9,.4) forwards;
-}
-@keyframes fall-away{
-  15%{ transform:translateY(-14px) rotate(-1deg); }
-  100%{ transform:translateY(125vh) rotate(5deg); opacity:.15; }
+@keyframes piece-fall{
+  12%{ transform:translateY(-18px) rotate(calc(var(--fr, 8deg) * -0.35)); }
+  100%{ transform:translateY(135vh) rotate(var(--fr, 8deg)); opacity:.08; }
 }
 body.thud .page{ animation:thud .3s ease; }
 @keyframes thud{
@@ -800,10 +795,19 @@ body.thud .page{ animation:thud .3s ease; }
 /* blackout used while everything resets */
 #shatterFade{
   position:fixed; inset:0; z-index:80; background:#171114;
+  display:grid; place-items:center;
   opacity:0; visibility:hidden; pointer-events:none;
   transition:opacity .8s ease, visibility 0s .8s;
 }
 #shatterFade.show{ opacity:1; visibility:visible; transition:opacity .8s ease; }
+#shatterFade p{
+  font-family:var(--font-letter); font-style:italic;
+  font-size:clamp(1.2rem, 3vw, 1.9rem);
+  color:var(--gold-light); text-align:center; padding:0 var(--s4);
+  opacity:0; transform:translateY(12px);
+  transition:opacity .8s var(--ease-out) .5s, transform .8s var(--ease-out) .5s;
+}
+#shatterFade.show p{ opacity:1; transform:none; }
 
 .music{
   position:fixed; z-index:40; right:max(3vw, 20px); bottom:max(3.5vh, 22px);
@@ -1300,13 +1304,15 @@ body.ready .music{ opacity:1; }
 <!-- ========================= TOOLS ============================== -->
 <div id="paintLayer" aria-hidden="true"></div>
 <div id="crackLayer" aria-hidden="true"></div>
-<div id="shatterFade" aria-hidden="true"></div>
+<div id="shatterFade" aria-hidden="true"><p>bruh why you breaking stuff</p></div>
 
 <div class="tools" role="toolbar" aria-label="Fun tools">
   <button class="tool-btn" id="toolHammer" aria-label="Hammer: crack the page" title="Break stuff">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M3 21l7-7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-      <path d="M11.8 12.2l6-6a1.8 1.8 0 0 1 2.6 0l1.3 1.3a1.8 1.8 0 0 1 0 2.6l-6 6z" fill="currentColor"/>
+      <g transform="rotate(-40 12 12)">
+        <rect x="4" y="3" width="16" height="7" rx="2" fill="currentColor"/>
+        <rect x="10.4" y="10.5" width="3.2" height="11" rx="1.6" fill="currentColor" opacity=".75"/>
+      </g>
     </svg>
   </button>
   <button class="tool-btn" id="toolBrush" aria-label="Golden brush: paint the page" title="Paint stuff">
@@ -1886,17 +1892,29 @@ function addCrack(x, y){
 
 function shatter(){
   shattering = true;
-  document.body.classList.add("shattering");
-  setTimeout(() => shatterFade.classList.add("show"), 1300);
+  /* every visible piece breaks loose with its own delay and spin */
+  const pieces = document.querySelectorAll(
+    ".page section > *, .bg-word, .monogram, .music, .tools, .blame-note"
+  );
+  pieces.forEach(el => {
+    el.style.setProperty("--fd", (Math.random() * 0.45).toFixed(2) + "s");
+    el.style.setProperty("--fr", ((Math.random() - .5) * 50).toFixed(1) + "deg");
+    el.classList.add("falling");
+  });
+  setTimeout(() => shatterFade.classList.add("show"), 1500);
   setTimeout(() => {
     crackLayer.innerHTML = "";
     crackCount = 0;
-    document.body.classList.remove("shattering");
-  }, 2200);
+    pieces.forEach(el => {
+      el.classList.remove("falling");
+      el.style.removeProperty("--fd");
+      el.style.removeProperty("--fr");
+    });
+  }, 3400);
   setTimeout(() => {
     shatterFade.classList.remove("show");
     shattering = false;
-  }, 2600);
+  }, 4200);
 }
 
 function addSplash(x, y){
