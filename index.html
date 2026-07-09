@@ -803,7 +803,7 @@ body.ready .music{ opacity:1; }
 <div class="intro" id="intro" aria-hidden="true">
   <div class="intro-glow"></div>
   <div class="intro-mark" id="introMark">T</div>
-  <p class="intro-line" id="introLine">a little something, made for you</p>
+  <p class="intro-line" id="introLine">a little something</p>
   <button class="intro-skip" id="introSkip">Skip</button>
 </div>
 
@@ -1079,12 +1079,11 @@ body.ready .music{ opacity:1; }
             </g>
           </svg>
         </div>
-        <p class="cake-hint" id="cakeHint">Click the cake to make a wish</p>
+        <p class="cake-hint" id="cakeHint">Make a wish</p>
       </div>
     </div>
 
     <div class="scroll-cue" aria-hidden="true">
-      <span>Scroll</span>
       <span class="track"><span class="dot"></span></span>
     </div>
   </section>
@@ -1480,7 +1479,7 @@ cakeTilt.addEventListener("click", () => {
     wished = false;
     cakeTilt.classList.remove("wished");
     cakeHint.classList.remove("hidden");
-    cakeHint.textContent = "Click the cake to make a wish";
+    cakeHint.textContent = "Make a wish";
   }
 });
 
