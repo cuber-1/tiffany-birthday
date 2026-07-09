@@ -2019,9 +2019,9 @@ function addTape(x, y){
 }
 
 /* spray can: hold and drag to mist */
-let spraying = false, sprayColor = PAINTS[0];
-function sprayAt(x, y){
-  for (let i = 0; i < 6; i++){
+let spraying = false, sprayColor = PAINTS[0], lastSprayX = 0, lastSprayY = 0;
+function sprayDots(x, y, n){
+  for (let i = 0; i < n; i++){
     const d = document.createElement("span");
     d.className = "spray-dot";
     const size = 10 + Math.random() * 16;
@@ -2031,7 +2031,17 @@ function sprayAt(x, y){
     d.style.background = sprayColor;
     paintLayer.appendChild(d);
   }
-  while (paintLayer.children.length > 700) paintLayer.firstChild.remove();
+  while (paintLayer.children.length > 1400) paintLayer.firstChild.remove();
+}
+function sprayAt(x, y){
+  /* fill the gap between move events so fast drags stay a solid line */
+  const dist = Math.hypot(x - lastSprayX, y - lastSprayY);
+  const steps = Math.min(30, Math.max(1, Math.floor(dist / 7)));
+  for (let s = 1; s <= steps; s++){
+    sprayDots(lastSprayX + (x - lastSprayX) * s / steps,
+              lastSprayY + (y - lastSprayY) * s / steps, 3);
+  }
+  lastSprayX = x; lastSprayY = y;
 }
 function toolTargetOk(target){
   return !(target.closest && target.closest(".tools, .music, .envelope, .cake-tilt, .letter-card, .intro, button, a"));
@@ -2040,7 +2050,8 @@ document.addEventListener("mousedown", e => {
   if (activeTool !== "spray" || shattering || !introDone || !toolTargetOk(e.target)) return;
   spraying = true;
   sprayColor = PAINTS[paintIdx++ % PAINTS.length];
-  sprayAt(e.clientX, e.clientY);
+  lastSprayX = e.clientX; lastSprayY = e.clientY;
+  sprayDots(e.clientX, e.clientY, 6);
   e.preventDefault();
 });
 document.addEventListener("mousemove", e => { if (spraying) sprayAt(e.clientX, e.clientY); });
@@ -2049,7 +2060,9 @@ document.addEventListener("touchstart", e => {
   if (activeTool !== "spray" || shattering || !introDone || !toolTargetOk(e.target)) return;
   spraying = true;
   sprayColor = PAINTS[paintIdx++ % PAINTS.length];
-  const t = e.touches[0]; sprayAt(t.clientX, t.clientY);
+  const t = e.touches[0];
+  lastSprayX = t.clientX; lastSprayY = t.clientY;
+  sprayDots(t.clientX, t.clientY, 6);
 }, { passive: true });
 document.addEventListener("touchmove", e => {
   if (!spraying) return;
