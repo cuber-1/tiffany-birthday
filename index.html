@@ -223,13 +223,28 @@ button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; 
 }
 .intro.lit .intro-line{ opacity:1; transform:none; }
 
-.intro-skip{
-  position:absolute; bottom:max(4vh, 24px); font-size:.7rem; letter-spacing:.3em;
-  text-transform:uppercase; color:rgba(251,246,238,.35); padding:var(--s1) var(--s2);
-  opacity:0; transition:opacity .8s ease 1.8s, color .3s ease;
+.intro-play{
+  position:relative; margin-top:var(--s2);
+  display:flex; flex-direction:column; align-items:center; gap:var(--s1);
+  background:none; border:none; cursor:pointer; color:var(--gold-light);
+  opacity:0; transform:translateY(10px);
+  transition:opacity 1.2s var(--ease-out) 1.6s, transform 1.2s var(--ease-out) 1.6s;
 }
-.intro.lit .intro-skip{ opacity:1; }
-.intro-skip:hover{ color:rgba(251,246,238,.8); }
+.intro.lit .intro-play{ opacity:1; transform:translateY(0); }
+.intro-play-circle{
+  width:64px; height:64px; border-radius:50%;
+  display:grid; place-items:center;
+  background:rgba(251,246,238,.08);
+  border:1px solid rgba(235,217,174,.45);
+  transition:background .3s ease, box-shadow .3s ease, transform .3s var(--ease-spring);
+}
+.intro-play:hover .intro-play-circle{
+  background:rgba(251,246,238,.16); box-shadow:0 0 0 6px rgba(235,217,174,.12); transform:scale(1.06);
+}
+.intro-play svg{ width:22px; height:22px; position:relative; left:2px; }
+.intro-play span:last-child{
+  font-size:.68rem; letter-spacing:.3em; text-transform:uppercase; color:rgba(251,246,238,.5);
+}
 
 .intro.done{ opacity:0; visibility:hidden; pointer-events:none; }
 
@@ -356,7 +371,7 @@ body.ready .hero-sub{ animation:rise-in 1.2s var(--ease-out) .7s forwards; }
 
 /* ---- the "don't blame me" note: appears above the music button on play ---- */
 .blame-note{
-  position:fixed; z-index:40; right:max(3vw, 20px); bottom:calc(max(3.5vh, 22px) + 72px);
+  position:fixed; z-index:70; right:max(3vw, 20px); bottom:calc(max(3.5vh, 22px) + 72px);
   max-width:200px; text-align:right;
   font-family:var(--font-letter);
   font-style:italic;
@@ -804,7 +819,14 @@ body.ready .music{ opacity:1; }
   <div class="intro-glow"></div>
   <div class="intro-mark" id="introMark">T</div>
   <p class="intro-line" id="introLine">a little something</p>
-  <button class="intro-skip" id="introSkip">Skip</button>
+  <button class="intro-play" id="introPlay" aria-label="Play birthday song and enter">
+    <span class="intro-play-circle">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M9 4.5 c0 -1 .7 -1.4 1.6 -.9 l9.2 6.9 c.9 .6 .9 1.4 0 2 l-9.2 6.9 c-.9 .5 -1.6 .1 -1.6 -.9 Z" fill="currentColor" transform="translate(-1.5,0)"/>
+      </svg>
+    </span>
+    <span>Play</span>
+  </button>
 </div>
 
 <header class="monogram" aria-hidden="true">
@@ -1302,22 +1324,31 @@ $("#letterBody").innerHTML        = CONFIG.letterText
 $("#letterSignoff").innerHTML     =
   `${CONFIG.signoffLine}<br><span class="from">${CONFIG.signoffName}</span>`;
 
-/* ---------------- cinematic intro ---------------- */
+/* ---------------- cinematic intro: tap Play to start the song + enter ---------------- */
 const intro = $("#intro");
+const introPlayBtn = $("#introPlay");
 let introDone = false;
 function finishIntro(){
-  if (introDone) return;
-  introDone = true;
   intro.classList.add("done");
   document.body.classList.add("ready");
 }
-if (reducedMotion){ finishIntro(); }
-else{
-  requestAnimationFrame(() => requestAnimationFrame(() => intro.classList.add("lit")));
-  setTimeout(finishIntro, 3200 / (CONFIG.animationSpeed || 1));
-  $("#introSkip").addEventListener("click", finishIntro);
-  intro.addEventListener("click", e => { if (e.target === intro) finishIntro(); });
+function startExperience(){
+  if (introDone) return;
+  introDone = true;
+
+  audio.play().then(() => {
+    musicBtn.classList.add("playing");
+    musicBtn.setAttribute("aria-pressed", "true");
+  }).catch(() => {
+    showTip(`Add <b>${CONFIG.musicFile}</b> next to this file, then press play again.`);
+  });
+
+  /* flash the note over the dark screen before the page reveals */
+  blameNote.classList.add("show");
+  setTimeout(finishIntro, reducedMotion ? 500 : 1100 / (CONFIG.animationSpeed || 1));
 }
+requestAnimationFrame(() => requestAnimationFrame(() => intro.classList.add("lit")));
+introPlayBtn.addEventListener("click", startExperience);
 
 /* ---------------- scatter twinkling stars ---------------- */
 const starField = $("#stars");
