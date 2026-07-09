@@ -760,17 +760,8 @@ body.tool-hammer, body.tool-hammer *{
 body.tool-brush, body.tool-brush *{
   cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Cpath d='M20.7 3.3c.9.9.9 2.3 0 3.2l-8.3 8.3-3.2-3.2 8.3-8.3c.9-.9 2.3-.9 3.2 0z' fill='%23C29A56' stroke='%23413339' stroke-width='.8'/%3E%3Cpath d='M8.7 12.1l3.2 3.2-2.1 2c-1.2 1.2-3.1 1.5-4.7.9-.9-.3-1.9-.3-2.8.1.9-1 1.3-2.3 1.2-3.6-.1-1 .3-2.1 1.1-2.8z' fill='%23E2ACB5' stroke='%23413339' stroke-width='.8'/%3E%3C/svg%3E") 4 25, auto !important;
 }
-body.tool-spray, body.tool-spray *{
-  cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Crect x='9' y='8' width='9' height='13' rx='2' fill='%23C29A56' stroke='%23413339' stroke-width='1'/%3E%3Crect x='11.5' y='5' width='4' height='3' fill='%23A8813F'/%3E%3Ccircle cx='5' cy='5' r='1.1' fill='%23413339' opacity='.55'/%3E%3Ccircle cx='3.5' cy='8.5' r='1.1' fill='%23413339' opacity='.4'/%3E%3Ccircle cx='6' cy='11' r='1.1' fill='%23413339' opacity='.3'/%3E%3C/svg%3E") 5 6, auto !important;
-}
 body.tool-tape, body.tool-tape *{
   cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='10' r='7.5' fill='%239d9da3' stroke='%23413339' stroke-width='1'/%3E%3Ccircle cx='11' cy='10' r='3' fill='%23FBF6EE'/%3E%3Cpath d='M11 17.5h10v3.5H11z' fill='%23b8b8bc' stroke='%23413339' stroke-width='.8'/%3E%3C/svg%3E") 11 10, auto !important;
-}
-
-/* spray mist */
-.spray-dot{
-  position:absolute; border-radius:50%; pointer-events:none;
-  filter:blur(1px); opacity:.85;
 }
 
 /* duct tape patch: two crossed strips slapped over a crack */
@@ -1366,15 +1357,6 @@ body.ready .music{ opacity:1; }
       <path d="M8.7 12.1l3.2 3.2-2.1 2c-1.2 1.2-3.1 1.5-4.7.9-.9-.3-1.9-.3-2.8.1.9-1 1.3-2.3 1.2-3.6-.1-1 .3-2.1 1.1-2.8z" fill="currentColor" opacity=".55"/>
     </svg>
   </button>
-  <button class="tool-btn" id="toolSpray" aria-label="Spray can: drag to spray paint" title="Spray stuff">
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="9" y="8" width="9" height="13" rx="2" fill="currentColor"/>
-      <rect x="11.5" y="5" width="4" height="3" fill="currentColor" opacity=".7"/>
-      <circle cx="5" cy="5" r="1.1" fill="currentColor" opacity=".55"/>
-      <circle cx="3.5" cy="8.5" r="1.1" fill="currentColor" opacity=".4"/>
-      <circle cx="6" cy="11" r="1.1" fill="currentColor" opacity=".3"/>
-    </svg>
-  </button>
   <button class="tool-btn" id="toolTape" aria-label="Duct tape: patch up cracks" title="Fix stuff">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="11" cy="10" r="7.5" fill="currentColor"/>
@@ -1914,7 +1896,7 @@ const crackLayer  = $("#crackLayer");
 const paintLayer  = $("#paintLayer");
 const tapeLayer   = $("#tapeLayer");
 const shatterFade = $("#shatterFade");
-const toolBtns    = { hammer: $("#toolHammer"), brush: $("#toolBrush"), spray: $("#toolSpray"), tape: $("#toolTape") };
+const toolBtns    = { hammer: $("#toolHammer"), brush: $("#toolBrush"), tape: $("#toolTape") };
 const PAINTS      = ["#F3D6D9", "#DDD4EC", "#F8E4CF", "#CDE3F5", "#EBD9AE", "#E2ACB5"];
 let activeTool = null, paintIdx = 0, shattering = false;
 let cracks = [];           /* {x, y, taped} — taped cracks don't count toward the shatter */
@@ -2019,57 +2001,9 @@ function addTape(x, y){
   if (best) best.taped = true;
 }
 
-/* spray can: hold and drag to mist */
-let spraying = false, sprayColor = PAINTS[0], lastSprayX = 0, lastSprayY = 0;
-function sprayDots(x, y, n){
-  for (let i = 0; i < n; i++){
-    const d = document.createElement("span");
-    d.className = "spray-dot";
-    const size = 10 + Math.random() * 16;
-    d.style.width = d.style.height = size + "px";
-    d.style.left = (x + (Math.random() - .5) * 26 - size / 2) + "px";
-    d.style.top  = (y + (Math.random() - .5) * 26 - size / 2) + "px";
-    d.style.background = sprayColor;
-    paintLayer.appendChild(d);
-  }
-  while (paintLayer.children.length > 1400) paintLayer.firstChild.remove();
-}
-function sprayAt(x, y){
-  /* fill the gap between move events so fast drags stay a solid line */
-  const dist = Math.hypot(x - lastSprayX, y - lastSprayY);
-  const steps = Math.min(30, Math.max(1, Math.floor(dist / 7)));
-  for (let s = 1; s <= steps; s++){
-    sprayDots(lastSprayX + (x - lastSprayX) * s / steps,
-              lastSprayY + (y - lastSprayY) * s / steps, 3);
-  }
-  lastSprayX = x; lastSprayY = y;
-}
 function toolTargetOk(target){
   return !(target.closest && target.closest(".tools, .music, .envelope, .cake-tilt, .letter-card, .intro, button, a"));
 }
-document.addEventListener("mousedown", e => {
-  if (activeTool !== "spray" || shattering || !introDone || !toolTargetOk(e.target)) return;
-  spraying = true;
-  sprayColor = PAINTS[paintIdx++ % PAINTS.length];
-  lastSprayX = e.clientX; lastSprayY = e.clientY;
-  sprayDots(e.clientX, e.clientY, 6);
-  e.preventDefault();
-});
-document.addEventListener("mousemove", e => { if (spraying) sprayAt(e.clientX, e.clientY); });
-document.addEventListener("mouseup", () => { spraying = false; });
-document.addEventListener("touchstart", e => {
-  if (activeTool !== "spray" || shattering || !introDone || !toolTargetOk(e.target)) return;
-  spraying = true;
-  sprayColor = PAINTS[paintIdx++ % PAINTS.length];
-  const t = e.touches[0];
-  lastSprayX = t.clientX; lastSprayY = t.clientY;
-  sprayDots(t.clientX, t.clientY, 6);
-}, { passive: true });
-document.addEventListener("touchmove", e => {
-  if (!spraying) return;
-  const t = e.touches[0]; sprayAt(t.clientX, t.clientY);
-}, { passive: true });
-document.addEventListener("touchend", () => { spraying = false; });
 
 /* broom: one click sweeps every mess layer off-screen, then clears it */
 $("#toolBroom").addEventListener("click", () => {
