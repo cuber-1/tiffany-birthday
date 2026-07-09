@@ -354,7 +354,7 @@ body.ready .hero-title .w3{ animation-delay:.3s; }
 }
 body.ready .hero-sub{ animation:rise-in 1.2s var(--ease-out) .7s forwards; }
 
-/* ---- the "don't blame me" note: sits above the music button, bobs forever ---- */
+/* ---- the "don't blame me" note: appears above the music button on play ---- */
 .blame-note{
   position:fixed; z-index:40; right:max(3vw, 20px); bottom:calc(max(3.5vh, 22px) + 72px);
   max-width:200px; text-align:right;
@@ -363,9 +363,13 @@ body.ready .hero-sub{ animation:rise-in 1.2s var(--ease-out) .7s forwards; }
   font-size:clamp(.78rem, 1.2vw, .9rem);
   color:var(--ink-faint);
   opacity:0;
-  animation:
-    rise-in 1.2s var(--ease-out) 2.6s forwards,
-    bob calc(3.4s / var(--speed)) ease-in-out 3.8s infinite;
+  transform:translateY(8px);
+  pointer-events:none;
+  transition:opacity .5s var(--ease-out), transform .5s var(--ease-out);
+}
+.blame-note.show{
+  opacity:1;
+  animation:bob calc(3.4s / var(--speed)) ease-in-out .5s infinite;
 }
 @keyframes bob{
   0%,100%{ transform:translateY(0); }
@@ -1193,7 +1197,7 @@ body.ready .music{ opacity:1; }
 </div>
 
 <!-- ========================= MUSIC ============================== -->
-<p class="blame-note">Isabeth told me you'd like this, so don't blame me.</p>
+<p class="blame-note" id="blameNote">Isabeth told me you like this song so if you don't don't blame me :)</p>
 <button class="music" id="musicBtn" aria-label="Play birthday music" aria-pressed="false">
   <span class="ring" aria-hidden="true"></span>
   <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1661,6 +1665,7 @@ celebrateBtn.addEventListener("click", e => {
 const audio = $("#bgm");
 const musicBtn = $("#musicBtn");
 const musicTip = $("#musicTip");
+const blameNote = $("#blameNote");
 audio.src = CONFIG.musicFile;
 let tipTimer;
 
@@ -1677,6 +1682,7 @@ musicBtn.addEventListener("click", async () => {
       await audio.play();
       musicBtn.classList.add("playing");
       musicBtn.setAttribute("aria-pressed", "true");
+      blameNote.classList.add("show");
     }catch(err){
       showTip(`Add <b>${CONFIG.musicFile}</b> next to this file, then press play again.`);
     }
@@ -1684,6 +1690,7 @@ musicBtn.addEventListener("click", async () => {
     audio.pause();
     musicBtn.classList.remove("playing");
     musicBtn.setAttribute("aria-pressed", "false");
+    blameNote.classList.remove("show");
   }
 });
 audio.addEventListener("error", () => {
