@@ -1343,6 +1343,11 @@ body.ready .music{ opacity:1; }
 <div id="shatterFade" aria-hidden="true"><p>bruh why you breaking stuff</p></div>
 
 <div class="tools" role="toolbar" aria-label="Fun tools">
+  <button class="tool-btn active" id="toolCursor" aria-label="Normal cursor" title="Normal cursor">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M6 3l12 10.5h-6.8L8 20.5z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+    </svg>
+  </button>
   <button class="tool-btn" id="toolHammer" aria-label="Hammer: crack the page" title="Break stuff">
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <g transform="rotate(-40 12 12)">
@@ -1907,10 +1912,12 @@ function setTool(name){
     document.body.classList.toggle("tool-" + t, activeTool === t);
     toolBtns[t].classList.toggle("active", activeTool === t);
   }
+  $("#toolCursor").classList.toggle("active", activeTool === null);
 }
 for (const t of Object.keys(toolBtns)){
   toolBtns[t].addEventListener("click", () => setTool(t));
 }
+$("#toolCursor").addEventListener("click", () => { if (activeTool) setTool(activeTool); });
 
 /* jagged crack drawn as random radiating polylines */
 function addCrack(x, y){
