@@ -354,6 +354,23 @@ body.ready .hero-title .w3{ animation-delay:.3s; }
 }
 body.ready .hero-sub{ animation:rise-in 1.2s var(--ease-out) .7s forwards; }
 
+/* ---- the "don't blame me" note: gently bobs up and down forever ---- */
+.blame-note{
+  margin-top:var(--s2);
+  font-family:var(--font-letter);
+  font-style:italic;
+  font-size:clamp(.85rem, 1.3vw, .98rem);
+  color:var(--ink-faint);
+  opacity:0;
+  animation:
+    rise-in 1.2s var(--ease-out) 1s forwards,
+    bob calc(3.4s / var(--speed)) ease-in-out 2.2s infinite;
+}
+@keyframes bob{
+  0%,100%{ transform:translateY(0); }
+  50%{ transform:translateY(-10px); }
+}
+
 /* ---- cake stage: perspective wrapper so the cake can tilt to cursor ---- */
 .cake-stage{
   margin-top:var(--s4);
@@ -881,6 +898,8 @@ body.ready .music{ opacity:1; }
         <span class="line"><span class="word w1">Happy</span> <span class="word w2">Birthday</span></span>
         <span class="line"><span class="word w3 hero-name" id="heroName">Ms.&nbsp;Tiffany</span></span>
       </h1>
+
+      <p class="blame-note">Isabeth told me you'd like this, so don't blame me.</p>
 
       <!-- the cake -->
       <div class="cake-stage">
